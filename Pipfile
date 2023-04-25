@@ -9,6 +9,7 @@ flask-mysqldb = "*"
 tenacity = "*"
 aiomysql = "*"
 flask = {extras = ["async"], version = "*"}
+fastapi = "*"
 
 [dev-packages]
 

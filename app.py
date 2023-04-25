@@ -152,16 +152,20 @@ async def login():
     user = await check_user_exist(name=user_name)
     if not user or not check_password_hash(user[3], password):
         return jsonify({'error': 'Invalid username or password.'}), 401
-    access_token = jwt.encode({'user_id': user[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
+    access_token = jwt.encode({'user_id': user[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)},
                               app.config['SECRET_KEY'],
                               algorithm='HS256')
-    refresh_token = jwt.encode({'user_id': user[0]}, app.config['SECRET_KEY'], algorithm='HS256')
+    refresh_token = jwt.encode({'user_id': user[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)},
+                               app.config['SECRET_KEY'], algorithm='HS256')
+    access_expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
+    refresh_expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute('INSERT INTO refresh_tokens (user_id, refresh_token) VALUES (%s, %s)',
                               (user[0], refresh_token))
-    return jsonify({'access_token': access_token, 'refresh_token': refresh_token}), 200
+    return jsonify({'access_token': access_token, 'refresh_token': refresh_token, 'access_expire': access_expire,
+                    'refresh_expire': refresh_expire}), 200
 
 
 # Obtain new access token from refresh token endpoint
@@ -179,66 +183,72 @@ async def refresh():
         jwt.decode(refresh_token, app.config['SECRET_KEY'], algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
         return jsonify({'error': 'Refresh token has expired.'}), 401
-    access_token = jwt.encode({'user_id': token[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
+    access_token = jwt.encode({'user_id': token[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)},
                               app.config['SECRET_KEY'],
                               algorithm='HS256')
-    return jsonify({'access_token': access_token}), 200
+    refresh_token = jwt.encode({'user_id': token[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)},
+                               app.config['SECRET_KEY'], algorithm='HS256')
+    access_expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
+    refresh_expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
+    return jsonify({'access_token': access_token, 'refresh_token': refresh_token, 'access_expire': access_expire,
+                    'refresh_expire': refresh_expire}), 200
 
 
 # Add pin
-@app.post('/users/<int:user_id>/pins')
+@app.post('/pins')
 @token_required
-async def add_pin(current_user, user_id):
+async def add_pin(current_user):
     title = request.form['title']
     body = request.form['body']
-    file = request.files['file']
-    filename = secure_filename(file.filename)
-    file.save(filename)
+    f = request.files.get('image')
+    if title == '' or body == '' or f is None:
+        return jsonify({'error': 'Field is empty'}), 400
+    filename = secure_filename(f.filename)
+    f.save(filename)
     image = filename
     added_date = date.today().strftime("%Y-%m-%d")
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute("INSERT INTO pins (title, body, image, user_id, added_date) VALUES (%s, %s, %s, %s, %s)",
-                              (title, body, image, user_id, added_date))
+                              (title, body, image, current_user[0], added_date))
             last_insert_id = cur.lastrowid
             return jsonify({'message': 'Pin created successfully!', 'last_insert_id': last_insert_id}), 201
 
 
 # Get All pins
-@app.get('/users/<int:user_id>/pins')
-async def get_pins(user_id):
+@app.get('/pins')
+async def get_pins():
+    created_by = request.args.get('created_by')
+    order_by_field = request.args.get('order_by_field')
+    order_by = request.args.get('order_by')
+    if created_by:
+        user = await check_user_exist(name=created_by)
+        user_id = user[0]
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            await cur.execute("SELECT * FROM pins")
+            query = "SELECT * FROM pins"
+            params = []
+            if created_by:
+                query += " WHERE user_id = %s"
+                params.append(user_id)
+            if order_by_field and order_by:
+                query += f" ORDER BY {order_by_field} {order_by}"
+            await cur.execute(query, params)
             pins = await cur.fetchall()
-            sorted_pins = sorted(pins, key=lambda x: x[5])
-            return jsonify({'pins': sorted_pins}), 200
+            return jsonify({'pins': pins}), 200
 
 
 # Get Pin By ID
-@app.get('/users/<int:user_id>/pins/<int:pin_id>')
-async def get_pin(user_id, pin_id):
+@app.get('/pins/<int:pin_id>')
+async def get_pin(pin_id):
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute("SELECT * FROM pins where pin_id =%s", (pin_id,))
             pin = await cur.fetchone()
             return jsonify({'pin': pin}), 200
-
-
-# Pins filter using user_id
-@app.get('/users/<int:user_id>/pins/filter')
-@token_required
-async def get_pins_filter(current_user, user_id):
-    pool = await create_pool()
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute("SELECT * FROM pins where user_id =%s", (user_id,))
-            pins = await cur.fetchall()
-            sorted_pins = sorted(pins, key=lambda x: x[5])
-            return jsonify({'pins': sorted_pins}), 200
 
 
 # Check if pin exists and return pin
@@ -252,42 +262,47 @@ async def check_pin_exists(user_id, pin_id):
 
 
 # Update pin
-@app.put('/users/<int:user_id>/pins/<int:pin_id>')
+@app.put('/pins/<int:pin_id>')
 @token_required
-async def update_pin(current_user, user_id, pin_id):
-    if await check_pin_exists(user_id, pin_id) is None:
+async def update_pin(current_user, pin_id):
+    if await check_pin_exists(current_user[0], pin_id) is None:
         return {"error": "Pin not found"}, 404
     title = request.form['title']
     body = request.form['body']
-    file = request.files['file']
-    filename = secure_filename(file.filename)
+    f = request.files.get('image')
+    filename = secure_filename(f.filename)
     image = filename
-    old_pin = await check_pin_exists(user_id, pin_id)
+    old_pin = await check_pin_exists(current_user[0], pin_id)
     old_image = old_pin[3]
-    if old_image != image:
+    if old_image != image and image != "":
         os.remove(old_image)
-        file.save(image)
+        f.save(image)
     added_date = date.today().strftime("%Y-%m-%d")
+    print(title, body, image, added_date, current_user[0])
+    update_title = old_image[1] if title == "" else title
+    update_body = old_image[2] if body == "" else body
+    update_image = old_image[3] if image == "" else image
+
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 "UPDATE pins SET title=%s, body=%s, image=%s, added_date=%s WHERE pin_id=%s and user_id=%s",
-                (title, body, image, added_date, pin_id, user_id))
-            updated_pin = await check_pin_exists(user_id, pin_id)
+                (update_title, update_body, update_image, added_date, pin_id, current_user[0]))
+            updated_pin = await check_pin_exists(current_user[0], pin_id)
             return jsonify({'message': 'Pin updated successfully!', "Updated Pin": updated_pin}), 200
 
 
 # Delete Pin
-@app.delete('/users/<int:user_id>/pins/<int:pin_id>')
+@app.delete('/pins/<int:pin_id>')
 @token_required
-async def delete_pin(current_user, user_id, pin_id):
-    if await check_pin_exists(user_id, pin_id) is None:
+async def delete_pin(current_user, pin_id):
+    if await check_pin_exists(current_user[0], pin_id) is None:
         return {"error": "Pin not found"}, 404
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            await cur.execute("DELETE FROM pins WHERE pin_id = %s and user_id = %s", (pin_id, user_id))
+            await cur.execute("DELETE FROM pins WHERE pin_id = %s and user_id = %s", (pin_id, current_user[0]))
             return jsonify({'message': 'Pin deleted successfully!'}), 200
 
 
