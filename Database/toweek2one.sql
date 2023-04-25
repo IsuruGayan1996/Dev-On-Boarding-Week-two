@@ -32,7 +32,7 @@ CREATE TABLE `pins` (
   PRIMARY KEY (`pin_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `pins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +41,7 @@ CREATE TABLE `pins` (
 
 LOCK TABLES `pins` WRITE;
 /*!40000 ALTER TABLE `pins` DISABLE KEYS */;
-INSERT INTO `pins` VALUES (1,'pin1','SSSSSSSSSSSSSS','Screenshot_from_2023-04-20_09-41-16.png',2,'2023-04-22'),(3,'Pin3','Hello2','image.png',5,'2023-04-23'),(4,'pin1','Hello1','Screenshot_from_2023-04-20_21-41-41.png',5,'2023-04-23'),(6,'pin1','Hello1','Screenshot_from_2023-04-20_21-41-41.png',11,'2023-04-24'),(7,'pin1','Hello1','Screenshot_from_2023-04-20_21-41-41.png',11,'2023-04-24'),(9,'pin1','Hello1','Screenshot_from_2023-04-20_21-41-41.png',11,'2023-04-24'),(10,'pin1','Hello1','Screenshot_from_2023-04-20_21-41-41.png',11,'2023-04-24'),(11,'pin1','Hello1','Screenshot_from_2023-04-20_21-41-41.png',11,'2023-04-24'),(12,'Pin4','Hello2','image.png',11,'2023-04-25'),(13,'pin1','Hello1','Screenshot_from_2023-04-20_21-41-41.png',11,'2023-04-24'),(14,'pin1','Hello1','Screenshot_from_2023-04-20_21-41-41.png',11,'2023-04-25');
+INSERT INTO `pins` VALUES (21,'pin1','pin1_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(22,'pin2','pin2_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(23,'pin2','pin2_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(24,'pin3','pin3_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(25,'pin4','pin4_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(26,'pin5','pin5_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(27,'pin5','pin5_body','Screenshot_from_2023-04-20_09-41-16.png',25,'2023-04-25'),(28,'pin4','pin4_body','Screenshot_from_2023-04-20_09-41-16.png',25,'2023-04-25'),(29,'pin3','pin3_body','Screenshot_from_2023-04-20_09-41-16.png',25,'2023-04-25'),(30,'pin2','pin2_body','Screenshot_from_2023-04-20_09-41-16.png',25,'2023-04-25'),(31,'pin1','pin1_body','Screenshot_from_2023-04-25_13-50-41.png',25,'2023-04-25');
 /*!40000 ALTER TABLE `pins` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -64,7 +64,7 @@ CREATE TABLE `refresh_tokens` (
 
 LOCK TABLES `refresh_tokens` WRITE;
 /*!40000 ALTER TABLE `refresh_tokens` DISABLE KEYS */;
-INSERT INTO `refresh_tokens` VALUES (2,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyfQ.xLtLz4_IFNJ71dV0y0lu8WwOPdy87UFBr9PsTsIxBDU'),(2,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyfQ.xLtLz4_IFNJ71dV0y0lu8WwOPdy87UFBr9PsTsIxBDU'),(2,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyfQ.xLtLz4_IFNJ71dV0y0lu8WwOPdy87UFBr9PsTsIxBDU'),(5,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1fQ.ti8-vMuowE-GvVhai9np182VVWG38aQqFKHTv1G5ylQ'),(11,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMX0.Y6KD83e-W4fO7xVl5KO1UbKAaCRqvrnUJ1OLIT-OWj8'),(11,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMX0.Y6KD83e-W4fO7xVl5KO1UbKAaCRqvrnUJ1OLIT-OWj8'),(11,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMX0.Y6KD83e-W4fO7xVl5KO1UbKAaCRqvrnUJ1OLIT-OWj8'),(5,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1fQ.ti8-vMuowE-GvVhai9np182VVWG38aQqFKHTv1G5ylQ'),(5,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1fQ.ti8-vMuowE-GvVhai9np182VVWG38aQqFKHTv1G5ylQ'),(5,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1fQ.ti8-vMuowE-GvVhai9np182VVWG38aQqFKHTv1G5ylQ'),(5,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1fQ.ti8-vMuowE-GvVhai9np182VVWG38aQqFKHTv1G5ylQ');
+INSERT INTO `refresh_tokens` VALUES (16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDA2MjE2fQ.I1RnBAyImuxpljAiPHYYig-RlLc7n3XaQZ_TTH2DwnQ'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDA2Mjc3fQ.yqWVxj4uPk2UWV4BxoIRwMPB0MocKv7NBWO9SMglj30'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDA5MzcyfQ.9L8KfGshgVQ05_7kep2cpsj2lgK_mrvMSUTf8_MVpnE'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDI2MTYzfQ.BimGWVIUYIlYwNucOkufTAlwXOw6pK5SCVJi966SQ0Q'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDI2MTc3fQ.xi9vxUn7OKtO7TSRaj89fGeOI4eRYOMessmnmPJX8Zg'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDI2Mjg4fQ.ellulMkyG-YenTZwflN8uqL_p8nji6kkIQXE8O1RsGM'),(25,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyNSwiZXhwIjoxNjgzMDI2NTg1fQ.beZRLbKaIOmIbsrGACYoK2ARWGgnyO41O9_Ul6LaXik'),(25,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyNSwiZXhwIjoxNjgzMDQ2MDU0fQ.JqlOxalDRaqawkElDi0pmRHU92Hvv0rqizawa0LQlHA');
 /*!40000 ALTER TABLE `refresh_tokens` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -81,7 +81,7 @@ CREATE TABLE `users` (
   `email` varchar(100) DEFAULT NULL,
   `password` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -90,7 +90,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (2,'Nethmi','nethmi27@gmail.com','sha256$wokmUMw6XOfMV5en$5cfd030b6a22cc9c8a8f7484f9dfc4180462b4d62d8cf57936e1dee7d4e33cef'),(5,'Ishan','ishanm28@gmail.com','sha256$O5lv94D5evnf3S1E$c978d944e510677d4efe6725ac133a79f5b34e82284d1d7e383b41e3d98ecbbc'),(11,'milindaaa','ishanm28@gmail.com','sha256$0mzN9nqXEfnd16y4$6e0b613295141bf696e7c44b57a085b713803403ac6d09dc8626a81694bce162'),(12,'Gimhann','milinda27@gmail.com','sha256$5PBRLIrXi6FUxgWw$4599eda6f8b35f31bb789182dc6599730ff91d3d47714ad70c6dc2372c1835cb'),(13,'Gimhannn','milinda27@gmail.com','sha256$Gv1QSI3kjwPMH4wa$3ead7f8fb71f04841b970df4e3a15f73f9e1c83f95f4569665394c351d5e49de'),(15,'Samitha','milinda27@gmail.com','sha256$MRFs9WlfM7AjDnYy$847d573fa9bf5a410d8394b99186391b3a4a112fa138c64415c1d788a4ab7568');
+INSERT INTO `users` VALUES (16,'example_user1','example_user1@gmail.com','sha256$U7FgIQSf9j26Gl2x$b7f4cc7b1b2892b870861d9fee58535beac965cf90b5008c35ee700173601dfc'),(17,'example_user2','example_user2@gmail.com','sha256$VRyXX3k1OF7FIIfB$a941912cbecbb7192349599395f679c35b47cbeb8af22b58d71383b6a7f4076b'),(18,'example_user3','example_user3@gmail.com','sha256$UZUzksUJUr2SNdey$493d19a07a13820cd58abb22a9502a2778df355cdc58cb9b6e4784bb836022f0'),(19,'example_user4','example_user4@gmail.com','sha256$4whQi7z0l7mBknVm$592951bc0cda45d917c149221be62c976c41121f57f701787cba991c25364e75'),(20,'example_user5','example_user5@gmail.com','sha256$YPLMwcjgFrcVUvyB$f992a0d56700cbaf22c5bac249544d8c096fc3f7b084f9a59c1270dc075724cb'),(21,'example_user6','example_user6@gmail.com','sha256$LVmUsptlHLTP9vT1$4d406b5e5abd963d35d94d508128e54718ec8b7551a61175a0b308f7a1de5c9a'),(22,'example_user7','example_user7@gmail.com','sha256$aC5HtuwoD4FOx2tI$18795826e5dfad062d04f8ee4235828f51fede4407c78c69f5a142d860af1c0c'),(23,'example_user8','example_user8@gmail.com','sha256$DNWqw0pT2IoJ2Eo3$cbac960fdbc5c964a2a9f834b1bcfc3cb2b66d94fece11bfff3dd6b4394bf0e7'),(24,'example_user9','example_user9@gmail.com','sha256$QGPAaQR8B0ZQLrMJ$ab78824db2a33e1bf5e5c26b713b9c0932145968d52b564c9e75d99b2cfe563a'),(25,'example_user10','example_user10@gmail.com','sha256$Lb3oXOhj4Ljsyjgg$d823c7a02f9d18fa2043cb3a78f1f53aa4a9d3986ec5d97baa23cab68635f893'),(26,'example_user11','example_user11gmail.com','sha256$nKeSrDzD7o55G1p8$0d5bdcc7e86e96a5b9b10e6ea550eb02be4820f92e7e153c31d258a9afcdf3b9');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -103,4 +103,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-04-25  0:46:32
+-- Dump completed on 2023-04-25 22:31:11
