@@ -278,10 +278,9 @@ async def update_pin(current_user, pin_id):
         os.remove(old_image)
         f.save(image)
     added_date = date.today().strftime("%Y-%m-%d")
-    print(title, body, image, added_date, current_user[0])
-    update_title = old_image[1] if title == "" else title
-    update_body = old_image[2] if body == "" else body
-    update_image = old_image[3] if image == "" else image
+    update_title = old_pin[1] if title == "" else title
+    update_body = old_pin[2] if body == "" else body
+    update_image = old_pin[3] if image == "" else image
 
     pool = await create_pool()
     async with pool.acquire() as conn:
