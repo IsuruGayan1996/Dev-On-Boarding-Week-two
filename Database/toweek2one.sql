@@ -32,7 +32,7 @@ CREATE TABLE `pins` (
   PRIMARY KEY (`pin_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `pins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +41,7 @@ CREATE TABLE `pins` (
 
 LOCK TABLES `pins` WRITE;
 /*!40000 ALTER TABLE `pins` DISABLE KEYS */;
-INSERT INTO `pins` VALUES (21,'pin1','pin1_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(22,'pin2','pin2_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(23,'pin2','pin2_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(24,'pin3','pin3_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(25,'pin4','pin4_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(26,'pin5','pin5_body','Screenshot_from_2023-04-20_09-41-16.png',16,'2023-04-25'),(27,'pin5','pin5_body','Screenshot_from_2023-04-20_09-41-16.png',25,'2023-04-25'),(28,'pin4','pin4_body','Screenshot_from_2023-04-20_09-41-16.png',25,'2023-04-25'),(29,'pin3','pin3_body','Screenshot_from_2023-04-20_09-41-16.png',25,'2023-04-25'),(30,'pin2','pin2_body','Screenshot_from_2023-04-20_09-41-16.png',25,'2023-04-25'),(31,'pin1','pin1_body','Screenshot_from_2023-04-25_13-50-41.png',25,'2023-04-25');
+INSERT INTO `pins` VALUES (32,'pin1','pin1_body','sample_image1.png',16,'2023-04-26'),(33,'pin2','pin2_body','sample_image1.png',16,'2023-04-26'),(34,'pin3','pin3_body','sample_image1.png',16,'2023-04-26'),(35,'pin4','pin4_body','sample_image1.png',16,'2023-04-26'),(36,'pin5','pin5_body','sample_image1.png',16,'2023-04-26'),(37,'pin5','pin5_body','sample_image1.png',25,'2023-04-26'),(38,'pin4','pin4_body','sample_image2.png',25,'2023-04-26'),(39,'pin3','pin3_body','sample_image2.png',25,'2023-04-26'),(40,'pin2','pin2_body','sample_image2.png',25,'2023-04-26'),(41,'pin1','pin1_body','sample_image2.png',25,'2023-04-26');
 /*!40000 ALTER TABLE `pins` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -64,7 +64,7 @@ CREATE TABLE `refresh_tokens` (
 
 LOCK TABLES `refresh_tokens` WRITE;
 /*!40000 ALTER TABLE `refresh_tokens` DISABLE KEYS */;
-INSERT INTO `refresh_tokens` VALUES (16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDA2MjE2fQ.I1RnBAyImuxpljAiPHYYig-RlLc7n3XaQZ_TTH2DwnQ'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDA2Mjc3fQ.yqWVxj4uPk2UWV4BxoIRwMPB0MocKv7NBWO9SMglj30'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDA5MzcyfQ.9L8KfGshgVQ05_7kep2cpsj2lgK_mrvMSUTf8_MVpnE'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDI2MTYzfQ.BimGWVIUYIlYwNucOkufTAlwXOw6pK5SCVJi966SQ0Q'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDI2MTc3fQ.xi9vxUn7OKtO7TSRaj89fGeOI4eRYOMessmnmPJX8Zg'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDI2Mjg4fQ.ellulMkyG-YenTZwflN8uqL_p8nji6kkIQXE8O1RsGM'),(25,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyNSwiZXhwIjoxNjgzMDI2NTg1fQ.beZRLbKaIOmIbsrGACYoK2ARWGgnyO41O9_Ul6LaXik'),(25,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyNSwiZXhwIjoxNjgzMDQ2MDU0fQ.JqlOxalDRaqawkElDi0pmRHU92Hvv0rqizawa0LQlHA');
+INSERT INTO `refresh_tokens` VALUES (16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDA2MjE2fQ.I1RnBAyImuxpljAiPHYYig-RlLc7n3XaQZ_TTH2DwnQ'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDA2Mjc3fQ.yqWVxj4uPk2UWV4BxoIRwMPB0MocKv7NBWO9SMglj30'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDA5MzcyfQ.9L8KfGshgVQ05_7kep2cpsj2lgK_mrvMSUTf8_MVpnE'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDI2MTYzfQ.BimGWVIUYIlYwNucOkufTAlwXOw6pK5SCVJi966SQ0Q'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDI2MTc3fQ.xi9vxUn7OKtO7TSRaj89fGeOI4eRYOMessmnmPJX8Zg'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDI2Mjg4fQ.ellulMkyG-YenTZwflN8uqL_p8nji6kkIQXE8O1RsGM'),(25,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyNSwiZXhwIjoxNjgzMDI2NTg1fQ.beZRLbKaIOmIbsrGACYoK2ARWGgnyO41O9_Ul6LaXik'),(25,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyNSwiZXhwIjoxNjgzMDQ2MDU0fQ.JqlOxalDRaqawkElDi0pmRHU92Hvv0rqizawa0LQlHA'),(16,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNiwiZXhwIjoxNjgzMDg2MzM2fQ.1llJSlFSiuI6WMh10FltIb5kreS-v5ohuEaKQ39uyGQ'),(25,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyNSwiZXhwIjoxNjgzMDg2NDE0fQ.juzayIXFkm75GaKOxA7ZQ0d1QhNueoAcj1j_UABY_eA');
 /*!40000 ALTER TABLE `refresh_tokens` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -103,4 +103,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-04-25 22:31:11
+-- Dump completed on 2023-04-26  9:31:40
