@@ -10,6 +10,8 @@ tenacity = "*"
 aiomysql = "*"
 flask = {extras = ["async"], version = "*"}
 fastapi = "*"
+requests = "*"
+aiounittest = "*"
 
 [dev-packages]
 

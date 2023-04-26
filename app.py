@@ -62,6 +62,8 @@ async def get_users():
         async with conn.cursor() as cur:
             await cur.execute("SELECT * FROM users")
             users = await cur.fetchall()
+            await cur.close()
+            pool.close()
             return jsonify({'users': users}), 200
 
 
@@ -91,6 +93,8 @@ async def add_user():
                 await cur.execute("INSERT INTO users (user_name, email, password) VALUES (%s, %s, %s)",
                                   (user["user_name"], user["email"], user["password"]))
                 last_insert_id = cur.lastrowid
+                await cur.close()
+                pool.close()
                 return jsonify({'message': 'User created successfully!', 'last_insert_id': last_insert_id}), 201
     return {"error": "Request must be JSON"}, 415
 
@@ -105,7 +109,9 @@ async def check_user_exist(id="", name=""):
             else:
                 await cur.execute("SELECT * FROM users WHERE user_id = %s", (id,))
             user = await cur.fetchone()
-            return user;
+            await cur.close()
+            pool.close()
+            return user
 
 
 # Update User
@@ -126,6 +132,8 @@ async def update_user(user_id):
                         await cur.execute("UPDATE users SET user_name=%s, email=%s, password=%s WHERE user_id=%s",
                                           (update_user['user_name'], update_user['email'], update_user['password'],
                                            user_id))
+                        await cur.close()
+                        pool.close()
                         return {"message": "User updated successfully!"}, 200
         else:
             return {"error": "Request must be JSON"}, 415
@@ -141,6 +149,8 @@ async def delete_user(user_id):
         async with pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+                await cur.close()
+                pool.close()
                 return jsonify({'message': 'User deleted successfully!'}), 200
 
 
@@ -164,6 +174,8 @@ async def login():
         async with conn.cursor() as cur:
             await cur.execute('INSERT INTO refresh_tokens (user_id, refresh_token) VALUES (%s, %s)',
                               (user[0], refresh_token))
+            await cur.close()
+            pool.close()
     return jsonify({'access_token': access_token, 'refresh_token': refresh_token, 'access_expire': access_expire,
                     'refresh_expire': refresh_expire}), 200
 
