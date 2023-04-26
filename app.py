@@ -189,6 +189,8 @@ async def refresh():
         async with conn.cursor() as cur:
             await cur.execute('SELECT * FROM refresh_tokens WHERE refresh_token = %s', (refresh_token,))
             token = await cur.fetchone()
+            await cur.close()
+            pool.close()
     if not token:
         return jsonify({'error': 'Invalid refresh token.'}), 401
     try:
@@ -202,6 +204,13 @@ async def refresh():
                                app.config['SECRET_KEY'], algorithm='HS256')
     access_expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
     refresh_expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
+    pool = await create_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute('INSERT INTO refresh_tokens (user_id, refresh_token) VALUES (%s, %s)',
+                              (token[0], refresh_token))
+            await cur.close()
+            pool.close()
     return jsonify({'access_token': access_token, 'refresh_token': refresh_token, 'access_expire': access_expire,
                     'refresh_expire': refresh_expire}), 200
 
@@ -225,6 +234,8 @@ async def add_pin(current_user):
             await cur.execute("INSERT INTO pins (title, body, image, user_id, added_date) VALUES (%s, %s, %s, %s, %s)",
                               (title, body, image, current_user[0], added_date))
             last_insert_id = cur.lastrowid
+            await cur.close()
+            pool.close()
             return jsonify({'message': 'Pin created successfully!', 'last_insert_id': last_insert_id}), 201
 
 
@@ -249,17 +260,24 @@ async def get_pins():
                 query += f" ORDER BY {order_by_field} {order_by}"
             await cur.execute(query, params)
             pins = await cur.fetchall()
+            await cur.close()
+            pool.close()
             return jsonify({'pins': pins}), 200
 
 
 # Get Pin By ID
 @app.get('/pins/<int:pin_id>')
 async def get_pin(pin_id):
+    pin=await check_pin_exists2(pin_id)
+    if not pin:
+        return jsonify({'error': 'Pin does not exist'}), 404
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute("SELECT * FROM pins where pin_id =%s", (pin_id,))
             pin = await cur.fetchone()
+            await cur.close()
+            pool.close()
             return jsonify({'pin': pin}), 200
 
 
@@ -270,6 +288,19 @@ async def check_pin_exists(user_id, pin_id):
         async with conn.cursor() as cur:
             await cur.execute("SELECT * FROM pins where pin_id =%s and user_id =%s", (pin_id, user_id))
             pin = await cur.fetchone()
+            await cur.close()
+            pool.close()
+            return pin
+
+
+async def check_pin_exists2(pin_id):
+    pool = await create_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT * FROM pins where pin_id =%s", (pin_id))
+            pin = await cur.fetchone()
+            await cur.close()
+            pool.close()
             return pin
 
 
@@ -301,6 +332,8 @@ async def update_pin(current_user, pin_id):
                 "UPDATE pins SET title=%s, body=%s, image=%s, added_date=%s WHERE pin_id=%s and user_id=%s",
                 (update_title, update_body, update_image, added_date, pin_id, current_user[0]))
             updated_pin = await check_pin_exists(current_user[0], pin_id)
+            await cur.close()
+            pool.close()
             return jsonify({'message': 'Pin updated successfully!', "Updated Pin": updated_pin}), 200
 
 

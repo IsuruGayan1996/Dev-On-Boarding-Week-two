@@ -12,6 +12,7 @@ flask = {extras = ["async"], version = "*"}
 fastapi = "*"
 requests = "*"
 aiounittest = "*"
+werkzeug = "*"
 
 [dev-packages]
 
