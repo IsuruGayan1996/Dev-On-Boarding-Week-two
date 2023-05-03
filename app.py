@@ -9,9 +9,13 @@ from functools import wraps
 import os
 from tenacity import retry, stop_after_attempt, wait_fixed
 import aiomysql
+from flask_cors import CORS
+import time
+from datetime import datetime
 
 # Initialize Flask application
 app = Flask(__name__)
+CORS(app)
 
 # Set a secret key for your Flask app
 app.config['SECRET_KEY'] = 'thisissecretkey'
@@ -60,11 +64,12 @@ async def get_users():
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            await cur.execute("SELECT * FROM users")
+            await cur.execute("SELECT user_id, user_name, email FROM users")
             users = await cur.fetchall()
             await cur.close()
             pool.close()
-            return jsonify({'users': users}), 200
+            users_dict_list = [dict(zip(('user_id', 'user_name', 'email', 'password'), row)) for row in users]
+            return {'users': users_dict_list}, 200
 
 
 # Get User using Id
@@ -72,7 +77,8 @@ async def get_users():
 async def get_user(user_id):
     user = await check_user_exist(id=user_id)
     if user:
-        return jsonify({"user": user}), 200
+        user_dict = dict(zip(('user_id', 'user_name', 'email'), user))
+        return {'user': user_dict}, 200
     else:
         return jsonify({"Error": "User not exists"}), 404
 
@@ -82,8 +88,12 @@ async def get_user(user_id):
 async def add_user():
     if request.is_json:
         user = request.get_json()
-        if user['user_name'] == '' or user['email'] == '' or user['password'] == '':
-            return {"error": "Feild is empty"}, 400
+        required_fields = ['user_name', 'email', 'password']
+        for field in required_fields:
+            if field not in user:
+                return {"error": f"{field} field is required"}, 400
+            elif not user.get(field):
+                return {"error": f"{field} field is empty"}, 400
         if await check_user_exist(name=user["user_name"]) is not None:
             return {"error": "User already exists"}, 400
         pool = await create_pool()
@@ -100,14 +110,14 @@ async def add_user():
 
 
 # Check if user exists and return user
-async def check_user_exist(id="", name=""):
+async def check_user_exist(id=None, name=None):
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            if id == "":
+            if id is None:
                 await cur.execute("SELECT * FROM users WHERE user_name = %s", (name,))
             else:
-                await cur.execute("SELECT * FROM users WHERE user_id = %s", (id,))
+                await cur.execute("SELECT user_id, user_name, email FROM users WHERE user_id = %s", (id,))
             user = await cur.fetchone()
             await cur.close()
             pool.close()
@@ -122,9 +132,12 @@ async def update_user(user_id):
     else:
         if request.is_json:
             update_user = request.get_json()
-            update_user["password"] = generate_password_hash(update_user["password"], method="sha256")
-            if update_user['user_name'] == '' or update_user['email'] == '' or update_user['password'] == '':
-                return {"error": "Feild is empty"}, 400
+            required_fields = ['user_name', 'email', 'password']
+            for field in required_fields:
+                if field not in update_user:
+                    return {"error": f"{field} field is required"}, 400
+                elif not update_user.get(field):
+                    return {"error": f"{field} field is empty"}, 400
             else:
                 pool = await create_pool()
                 async with pool.acquire() as conn:
@@ -160,79 +173,61 @@ async def login():
     user_name = request.json['user_name']
     password = request.json['password']
     user = await check_user_exist(name=user_name)
-    if not user or not check_password_hash(user[3], password):
+    user_dict = dict(zip(('user_id', 'user_name', 'email', 'password'), user))
+    if not user or not check_password_hash(user_dict['password'], password):
         return jsonify({'error': 'Invalid username or password.'}), 401
-    access_token = jwt.encode({'user_id': user[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)},
+    access_expire = int(time.time()) + 3600
+    refresh_expire = int(time.time()) + 604800
+    access_token = jwt.encode({'user_id': user_dict['user_id'], 'exp': access_expire},
                               app.config['SECRET_KEY'],
                               algorithm='HS256')
-    refresh_token = jwt.encode({'user_id': user[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)},
+    refresh_token = jwt.encode({'user_id': user_dict['user_id'], 'exp': refresh_expire},
                                app.config['SECRET_KEY'], algorithm='HS256')
-    access_expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
-    refresh_expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
-    pool = await create_pool()
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute('INSERT INTO refresh_tokens (user_id, refresh_token) VALUES (%s, %s)',
-                              (user[0], refresh_token))
-            await cur.close()
-            pool.close()
-    return jsonify({'access_token': access_token, 'refresh_token': refresh_token, 'access_expire': access_expire,
-                    'refresh_expire': refresh_expire}), 200
+    return jsonify({'access_token': access_token, 'refresh_token': refresh_token,
+                    'access_expire': datetime.fromtimestamp(access_expire),
+                    'refresh_expire': datetime.fromtimestamp(refresh_expire)}), 200
 
 
 # Obtain new access token from refresh token endpoint
 @app.route('/refresh', methods=['POST'])
 async def refresh():
     refresh_token = request.json['refresh_token']
-    pool = await create_pool()
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute('SELECT * FROM refresh_tokens WHERE refresh_token = %s', (refresh_token,))
-            token = await cur.fetchone()
-            await cur.close()
-            pool.close()
-    if not token:
-        return jsonify({'error': 'Invalid refresh token.'}), 401
     try:
-        jwt.decode(refresh_token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        token_payload = jwt.decode(refresh_token, app.config['SECRET_KEY'], algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
         return jsonify({'error': 'Refresh token has expired.'}), 401
-    access_token = jwt.encode({'user_id': token[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)},
+    except jwt.InvalidTokenError:
+        return jsonify({'error': 'Invalid refresh token.'}), 401
+    access_expire = int(time.time()) + 3600
+    refresh_expire = int(time.time()) + 604800
+    access_token = jwt.encode({'user_id': token_payload['user_id'], 'exp': access_expire},
                               app.config['SECRET_KEY'],
                               algorithm='HS256')
-    refresh_token = jwt.encode({'user_id': token[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)},
+    refresh_token = jwt.encode({'user_id': token_payload['user_id'], 'exp': refresh_expire},
                                app.config['SECRET_KEY'], algorithm='HS256')
-    access_expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
-    refresh_expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
-    pool = await create_pool()
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute('INSERT INTO refresh_tokens (user_id, refresh_token) VALUES (%s, %s)',
-                              (token[0], refresh_token))
-            await cur.close()
-            pool.close()
-    return jsonify({'access_token': access_token, 'refresh_token': refresh_token, 'access_expire': access_expire,
-                    'refresh_expire': refresh_expire}), 200
+    return jsonify({'access_token': access_token, 'refresh_token': refresh_token,
+                    'access_expire': datetime.fromtimestamp(access_expire),
+                    'refresh_expire': datetime.fromtimestamp(refresh_expire)}), 200
 
 
 # Add pin
 @app.post('/pins')
 @token_required
 async def add_pin(current_user):
-    title = request.form['title']
-    body = request.form['body']
-    f = request.files.get('image')
-    if title == '' or body == '' or f is None:
-        return jsonify({'error': 'Field is empty'}), 400
-    filename = secure_filename(f.filename)
-    f.save(filename)
+    required_fields = {'title': request.form.get('title'), 'body': request.form.get('body'),
+                       'image': request.files.get('image')}
+    for field, value in required_fields.items():
+        if value is None or value == '':
+            return jsonify({'error': f'{field} is required.'}), 400
+    filename = secure_filename(required_fields['image'].filename)
+    required_fields['image'].save(filename)
     image = filename
     added_date = date.today().strftime("%Y-%m-%d")
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute("INSERT INTO pins (title, body, image, user_id, added_date) VALUES (%s, %s, %s, %s, %s)",
-                              (title, body, image, current_user[0], added_date))
+                              (required_fields['title'], required_fields['body'], image, current_user[0], added_date))
             last_insert_id = cur.lastrowid
             await cur.close()
             pool.close()
@@ -262,42 +257,30 @@ async def get_pins():
             pins = await cur.fetchall()
             await cur.close()
             pool.close()
-            return jsonify({'pins': pins}), 200
+            pins_dict_list = [dict(zip(('pin_id', 'title', 'body', 'image', 'user_id', 'added_date'), row)) for row in
+                              pins]
+            return jsonify({'pins': pins_dict_list}), 200
 
 
 # Get Pin By ID
 @app.get('/pins/<int:pin_id>')
 async def get_pin(pin_id):
-    pin=await check_pin_exists2(pin_id)
+    pin = await check_pin_exists(pin_id=pin_id)
     if not pin:
         return jsonify({'error': 'Pin does not exist'}), 404
-    pool = await create_pool()
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute("SELECT * FROM pins where pin_id =%s", (pin_id,))
-            pin = await cur.fetchone()
-            await cur.close()
-            pool.close()
-            return jsonify({'pin': pin}), 200
+    pin_dict = dict(zip(('pin_id', 'title', 'body', 'image', 'user_id', 'added_date'), pin))
+    return jsonify({'pin': pin_dict}), 200
 
 
 # Check if pin exists and return pin
-async def check_pin_exists(user_id, pin_id):
+async def check_pin_exists(user_id=None, pin_id=None):
     pool = await create_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            await cur.execute("SELECT * FROM pins where pin_id =%s and user_id =%s", (pin_id, user_id))
-            pin = await cur.fetchone()
-            await cur.close()
-            pool.close()
-            return pin
-
-
-async def check_pin_exists2(pin_id):
-    pool = await create_pool()
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute("SELECT * FROM pins where pin_id =%s", (pin_id))
+            if user_id is None:
+                await cur.execute("SELECT * FROM pins where pin_id =%s", (pin_id))
+            else:
+                await cur.execute("SELECT * FROM pins where pin_id =%s and user_id =%s", (pin_id, user_id))
             pin = await cur.fetchone()
             await cur.close()
             pool.close()
@@ -308,7 +291,7 @@ async def check_pin_exists2(pin_id):
 @app.put('/pins/<int:pin_id>')
 @token_required
 async def update_pin(current_user, pin_id):
-    if await check_pin_exists(current_user[0], pin_id) is None:
+    if await check_pin_exists(user_id=current_user[0], pin_id=pin_id) is None:
         return {"error": "Pin not found"}, 404
     title = request.form['title']
     body = request.form['body']
@@ -334,7 +317,8 @@ async def update_pin(current_user, pin_id):
             updated_pin = await check_pin_exists(current_user[0], pin_id)
             await cur.close()
             pool.close()
-            return jsonify({'message': 'Pin updated successfully!', "Updated Pin": updated_pin}), 200
+            pin_dict = dict(zip(('pin_id', 'title', 'body', 'image', 'user_id', 'added_date'), updated_pin))
+            return jsonify({'message': 'Pin updated successfully!', "Updated Pin": pin_dict}), 200
 
 
 # Delete Pin
