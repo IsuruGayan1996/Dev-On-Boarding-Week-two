@@ -176,16 +176,7 @@ async def login():
     user_dict = dict(zip(('user_id', 'user_name', 'email', 'password'), user))
     if not user or not check_password_hash(user_dict['password'], password):
         return jsonify({'error': 'Invalid username or password.'}), 401
-    access_expire = int(time.time()) + 3600
-    refresh_expire = int(time.time()) + 604800
-    access_token = jwt.encode({'user_id': user_dict['user_id'], 'exp': access_expire},
-                              app.config['SECRET_KEY'],
-                              algorithm='HS256')
-    refresh_token = jwt.encode({'user_id': user_dict['user_id'], 'exp': refresh_expire},
-                               app.config['SECRET_KEY'], algorithm='HS256')
-    return jsonify({'access_token': access_token, 'refresh_token': refresh_token,
-                    'access_expire': datetime.fromtimestamp(access_expire),
-                    'refresh_expire': datetime.fromtimestamp(refresh_expire)}), 200
+    return create_and_return_token(user_dict['user_id'])
 
 
 # Obtain new access token from refresh token endpoint
@@ -198,12 +189,16 @@ async def refresh():
         return jsonify({'error': 'Refresh token has expired.'}), 401
     except jwt.InvalidTokenError:
         return jsonify({'error': 'Invalid refresh token.'}), 401
+    return create_and_return_token(token_payload['user_id'])
+
+
+def create_and_return_token(user_id):
     access_expire = int(time.time()) + 3600
     refresh_expire = int(time.time()) + 604800
-    access_token = jwt.encode({'user_id': token_payload['user_id'], 'exp': access_expire},
+    access_token = jwt.encode({'user_id': user_id, 'exp': access_expire},
                               app.config['SECRET_KEY'],
                               algorithm='HS256')
-    refresh_token = jwt.encode({'user_id': token_payload['user_id'], 'exp': refresh_expire},
+    refresh_token = jwt.encode({'user_id': user_id, 'exp': refresh_expire},
                                app.config['SECRET_KEY'], algorithm='HS256')
     return jsonify({'access_token': access_token, 'refresh_token': refresh_token,
                     'access_expire': datetime.fromtimestamp(access_expire),
