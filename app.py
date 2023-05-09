@@ -12,20 +12,25 @@ import aiomysql
 from flask_cors import CORS
 import time
 from datetime import datetime
+from decouple import config
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Flask application
 app = Flask(__name__)
 CORS(app)
 
 # Set a secret key for your Flask app
-app.config['SECRET_KEY'] = 'thisissecretkey'
+app.config['SECRET_KEY'] = config('SECRET_KEY')
 
 # Database configuration
-MYSQL_HOST = "localhost"
-MYSQL_USER = "root"
-MYSQL_PASSWORD = ""
-MYSQL_DB = "toweek2one"
-MYSQL_PORT = 3306
+MYSQL_HOST = config('MYSQL_HOST')
+MYSQL_USER = config('MYSQL_USER')
+MYSQL_PASSWORD = config('MYSQL_PASSWORD')
+MYSQL_DB = config('MYSQL_DB')
+MYSQL_PORT = config('MYSQL_PORT', cast=int)
 
 
 # Function to create database connection pool
