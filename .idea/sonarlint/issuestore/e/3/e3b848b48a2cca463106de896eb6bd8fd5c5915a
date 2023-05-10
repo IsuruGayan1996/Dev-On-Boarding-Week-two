@@ -1,11 +1,0 @@
-
-upython:S1192"QDefine a constant instead of duplicating this literal 'application/json' 3 times.(¨ÿüËùÿÿÿÿ8éº¨ôû0
-}python:S1192p"YDefine a constant instead of duplicating this literal '%a, %d %b %Y %H:%M:%S %Z' 4 times.(üÙ†şÿÿÿÿ8ô´“ôû0
-fpython:S1192b"GDefine a constant instead of duplicating this literal '/login' 6 times.(ÀÊı‰8ô´“ôû0
-xpython:S1192'"TDefine a constant instead of duplicating this literal "johndoe@example.com" 5 times.(´’ÎÖøÿÿÿÿ8ô´“ôû0
-fpython:S1192
-"GDefine a constant instead of duplicating this literal '/users' 4 times.(ÿ­ÑŠ8õ´“ôû0
-npython:S1192="JDefine a constant instead of duplicating this literal '/users/28' 3 times.(›ç×²şÿÿÿÿ8§ªªôû0
-Lpython:S1481V"-Remove the unused local variable "response1".(Óàè8Ã¦ôû0
->python:S125û"Remove this commented out code.(êÂø«8â©œôû0
-Cpython:S125ˆ"Remove this commented out code.(¿œØóûÿÿÿÿ8ãÃÓÙı0
