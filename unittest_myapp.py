@@ -260,3 +260,11 @@ class TestAPI(unittest.TestCase):
 
 if __name__ == "__main__":
     tester = TestAPI()
+
+# if __name__ == '__main__':
+#     suite = unittest.TestSuite()
+#     suite.addTest(TestAPI('test_delete_pin'))
+#
+#     runner = unittest.TextTestRunner()
+#     runner.run(suite)
+
