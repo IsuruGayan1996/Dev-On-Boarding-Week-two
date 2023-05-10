@@ -16,7 +16,6 @@ werkzeug = "*"
 pytest = "*"
 coverage = "*"
 flask-cors = "*"
-python-decouple = "*"
 python-dotenv = "*"
 
 [dev-packages]
